@@ -1,34 +1,45 @@
 module Main where
 
 import System.Environment
-import Numeric.Natural
 import System.Exit
+import Data.String
 import Data.Maybe
 import Data.List
 import Data.Char
+import Data.Typeable
 import Text.Read
 
 main :: IO ()
-main = getArgs >>= parse >>= putStrLn
+main = getArgs >>= parse
 
 -- PARSING ARGS -------------------------------------
 
-parse :: [String] -> IO (String)
+parse :: [String] -> IO ()
 parse [] = usage >> exitError
-parse [n, e] = usage >> exitError
 parse [n, e, path]
     | isNothing checkN = usage >> exitError
     | isNothing checkE = usage >> exitError
-    | otherwise = getFile $ path
+    | fromJust checkN == 0 = usage >> exitError
+    | otherwise = getFile path
     where
         checkN = readMaybe n :: Maybe Int
-        checkE =  readMaybe e :: Maybe Double
+        checkE = readMaybe e :: Maybe Double
 parse otherwise = usage >> exitError
 
 -- READ FILE ----------------------------------------
 
-getFile :: String -> IO (String)
-getFile path = readFile path
+split :: String -> Char -> [String]
+split [] delim = [""]
+split (c:cs) delim
+    | c == delim = "" : rest
+    | otherwise = (c : head rest) : tail rest
+    where
+        rest = split cs delim
+
+getFile :: String -> IO ()
+getFile path = do
+    file <- readFile path
+    print $ lines $ file
 
 -- TOOLS --------------------------------------------
 
