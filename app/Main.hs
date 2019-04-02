@@ -19,7 +19,7 @@ parse [] = usage >> exitError
 parse [n, e, path]
     | isNothing checkN = usage >> exitError
     | isNothing checkE = usage >> exitError
-    | fromJust checkN == 0 = usage >> exitError
+    | fromJust checkN < 1 = usage >> exitError
     | otherwise = getFile path
     where
         checkN = readMaybe n :: Maybe Int
