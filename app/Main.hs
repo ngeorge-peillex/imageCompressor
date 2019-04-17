@@ -36,10 +36,13 @@ parse otherwise = usage >> exitError
 -- READ FILE ----------------------------------------
 
 readPixel :: String -> Maybe Pixel
-readPixel line = let tmp = splitAt 6 line
-                     first = readMaybe $ fst tmp :: Maybe (Int, Int)
-                     second = readMaybe $ snd tmp :: Maybe (Int, Int, Int)
-                     in tupleToPixel first second
+readPixel line = let index = elemIndex ')' line
+                    in case index of
+                        Just index -> tupleToPixel first second
+                                        where tmp = splitAt (index + 1) line
+                                              first = readMaybe $ fst tmp :: Maybe (Int, Int)
+                                              second = readMaybe $ snd tmp :: Maybe (Int, Int, Int)
+                        Nothing -> Nothing
 
 tupleToPixel :: Maybe (Int, Int) -> Maybe (Int, Int, Int) -> Maybe Pixel
 tupleToPixel Nothing _ = Nothing
