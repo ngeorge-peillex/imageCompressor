@@ -60,9 +60,20 @@ tupleToPixel (Just (x, y)) (Just (r, g, b))
 getFile :: Int -> String -> IO ()
 getFile nbr path = do
     file <- readFile path
-    --print $ lines file !! print $ splitEvery ((length $ lines file) / nbr) $ map (readPixel) (lines file)
     print $ splitEvery ((length $ lines file) `div` nbr) $ map (readPixel) (lines file)
-    --print $ map (splitAt 6) (lines file)
+
+-- CLUSTERISATION -----------------------------------
+
+averageColor :: [Pixel] -> Color
+averageColor array = Color 1 2 3
+
+-- DISPLAY ------------------------------------------
+
+displayAverage :: Color -> IO ()
+displayAverage color = putStrLn ("--\n" ++ show color ++ "-\n")
+
+displayCluster :: [Pixel] -> IO [()]
+displayCluster array = mapM (putStrLn.show) array
 
 -- TOOLS --------------------------------------------
 
