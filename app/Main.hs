@@ -27,13 +27,18 @@ parse [n, e, path]
     | isNothing checkN = usage >> exitError
     | isNothing checkE = usage >> exitError
     | fromJust checkN < 1 = usage >> exitError
-    | otherwise = getFile path
+    | otherwise = getFile (fromJust checkN) path
     where
         checkN = readMaybe n :: Maybe Int
         checkE = readMaybe e :: Maybe Double
 parse otherwise = usage >> exitError
 
 -- READ FILE ----------------------------------------
+
+splitEvery :: Int -> [a] -> [[a]]
+splitEvery _ [] = []
+splitEvery n xs = as : splitEvery n bs 
+                    where (as,bs) = splitAt n xs
 
 readPixel :: String -> Maybe Pixel
 readPixel line = let index = elemIndex ')' line
@@ -52,12 +57,11 @@ tupleToPixel (Just (x, y)) (Just (r, g, b))
     | r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255 = Nothing
     | otherwise = Just $ Pixel (Point x y) (Color r g b)
 
-getFile :: String -> IO ()
-getFile path = do
+getFile :: Int -> String -> IO ()
+getFile nbr path = do
     file <- readFile path
-    --print $ lines file !! 0
-    print $ map (readPixel) (lines file)
-    --print $ Pixel (Point 1 2) (Color 1 2 3)
+    --print $ lines file !! print $ splitEvery ((length $ lines file) / nbr) $ map (readPixel) (lines file)
+    print $ splitEvery ((length $ lines file) `div` nbr) $ map (readPixel) (lines file)
     --print $ map (splitAt 6) (lines file)
 
 -- TOOLS --------------------------------------------
