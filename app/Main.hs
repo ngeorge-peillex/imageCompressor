@@ -11,12 +11,18 @@ import System.Random
 import Text.Read
 
 data Point = Point Int Int
-            deriving Show
-data Color = Color Int Int Int
-            deriving Show
-data Pixel = Pixel Point Color
-            deriving Show
+instance Show Point where
+    show (Point x y) = "(" ++ show x ++ "," ++ show y ++ ")"
 
+
+data Color = Color Int Int Int
+instance Show Color where
+    show (Color r g b) = "(" ++ show r ++ "," ++ show g ++ "," ++ show b ++ ")"
+
+data Pixel = Pixel Point Color
+instance Show Pixel where
+    show (Pixel point color) = show point ++ " " ++ show color 
+    
 main :: IO ()
 main = getArgs >>= parse
 
@@ -91,10 +97,13 @@ getPointDistance xa xb ya yb za zb = sqrt((xb-xa)^2 + (yb-ya)^2 + (zb-za)^2)
 -- DISPLAY ------------------------------------------
 
 displayAverage :: Color -> IO ()
-displayAverage color = putStrLn ("--\n" ++ show color ++ "-\n")
+displayAverage color = putStrLn ("--\n" ++ show color ++ "\n-\n")
 
 displayCluster :: [Pixel] -> IO [()]
 displayCluster array = mapM (putStrLn.show) array
+
+displayAll :: [Pixel] -> IO ()
+displayAll array = putStrLn "Final display\n"
 
 -- TOOLS --------------------------------------------
 
