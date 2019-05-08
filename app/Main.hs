@@ -19,6 +19,8 @@ data Color = Color Int Int Int
 instance Show Color where
     show (Color r g b) = "(" ++ show r ++ "," ++ show g ++ "," ++ show b ++ ")"
 
+
+
 data Pixel = Pixel Point Color
 instance Show Pixel where
     show (Pixel point color) = show point ++ " " ++ show color 
@@ -89,9 +91,16 @@ getCluster array list k g = do
 
 
 
---getPointDistance :: Int -> Int -> Int -> Int -> Int
+getPointDistance :: Double -> Double -> Double -> Double -> Double -> Double -> Double
 getPointDistance xa xb ya yb za zb = sqrt((xb-xa)^2 + (yb-ya)^2 + (zb-za)^2)
 
+
+
+getClusterIndex :: Int -> Int -> Int -> Pixel -> [(Double, Double, Double)] -> Int
+getClusterIndex it k min pixel cluster = if (length cluster > 0) then computeClusterIndex it k min pixel cluster else min
+
+computeClusterIndex :: Int -> Int -> Int -> Pixel -> [(Double, Double, Double)] -> Int
+computeClusterIndex it k min (Pixel point (Color r g b)) cluster = if (min == -1 || r == 0) then 0 else 0
 
 
 -- DISPLAY ------------------------------------------
