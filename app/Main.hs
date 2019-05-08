@@ -7,6 +7,7 @@ import Data.Maybe
 import Data.List
 import Data.Char
 import Data.Typeable
+import System.Random
 import Text.Read
 
 data Point = Point Int Int
@@ -66,14 +67,32 @@ tupleToPixel (Just (x, y)) (Just (r, g, b))
 getFile :: Int -> String -> IO ()
 getFile nbr path = do
     file <- readFile path
-    displayAverage $ (Color 10 20 30)
-    displayCluster $ [Pixel (Point 1 2) (Color 11 22 33), Pixel (Point 3 4) (Color 44 55 66)]
-    print $ splitEvery ((length $ lines file) `div` nbr) $ map (readPixel) (lines file)
+    g <- newStdGen
+    print $ getCluster  (catMaybes ( map (readPixel) (lines file))) [] nbr g
+    print $ map (readPixel) (lines file)
 
 -- CLUSTERISATION -----------------------------------
 
 averageColor :: [Pixel] -> Color
 averageColor array = Color 1 2 3
+
+
+getCluster :: [Pixel] -> [Pixel] -> Int -> StdGen -> [Pixel]
+getCluster array list k g = do
+    let (rdm, g2) = randomR (0, length array - 1) g
+    if (k <= 0)
+        then
+        list
+        else
+        getCluster array (list ++ [array!!(rdm)]) (k-1) g2
+
+
+
+
+--getPointDistance :: Int -> Int -> Int -> Int -> Int
+getPointDistance xa xb ya yb za zb = sqrt((xb-xa)^2 + (yb-ya)^2 + (zb-za)^2)
+
+
 
 -- DISPLAY ------------------------------------------
 
