@@ -116,6 +116,12 @@ displayAll array = putStrLn "Final display\n"
 
 -- TOOLS --------------------------------------------
 
+pixelToColor :: Pixel -> (Double, Double, Double)
+pixelToColor (Pixel point (Color r g b)) = (fromIntegral r, fromIntegral g, fromIntegral b)
+
+pixelsToColors :: [Pixel] -> [(Double, Double, Double)]
+pixelsToColors array = map pixelToColor array 
+
 usage :: IO ()
 usage = putStrLn "USAGE: ./imageCompressor n e IN\n\n\tn\tnumber of colors in the final image\n\te\tconvergence limit\n\tIN\tpath to the file containing the colors of the pixels"
 
