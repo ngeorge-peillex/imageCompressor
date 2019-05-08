@@ -10,12 +10,18 @@ import Data.Typeable
 import Text.Read
 
 data Point = Point Int Int
-            deriving Show
-data Color = Color Int Int Int
-            deriving Show
-data Pixel = Pixel Point Color
-            deriving Show
+instance Show Point where
+    show (Point x y) = "(" ++ show x ++ "," ++ show y ++ ")"
 
+
+data Color = Color Int Int Int
+instance Show Color where
+    show (Color r g b) = "(" ++ show r ++ "," ++ show g ++ "," ++ show b ++ ")"
+
+data Pixel = Pixel Point Color
+instance Show Pixel where
+    show (Pixel point color) = show point ++ " " ++ show color 
+    
 main :: IO ()
 main = getArgs >>= parse
 
@@ -60,6 +66,8 @@ tupleToPixel (Just (x, y)) (Just (r, g, b))
 getFile :: Int -> String -> IO ()
 getFile nbr path = do
     file <- readFile path
+    displayAverage $ (Color 10 20 30)
+    displayCluster $ [Pixel (Point 1 2) (Color 11 22 33), Pixel (Point 3 4) (Color 44 55 66)]
     print $ splitEvery ((length $ lines file) `div` nbr) $ map (readPixel) (lines file)
 
 -- CLUSTERISATION -----------------------------------
@@ -70,10 +78,13 @@ averageColor array = Color 1 2 3
 -- DISPLAY ------------------------------------------
 
 displayAverage :: Color -> IO ()
-displayAverage color = putStrLn ("--\n" ++ show color ++ "-\n")
+displayAverage color = putStrLn ("--\n" ++ show color ++ "\n-\n")
 
 displayCluster :: [Pixel] -> IO [()]
 displayCluster array = mapM (putStrLn.show) array
+
+displayAll :: [Pixel] -> IO ()
+displayAll array = putStrLn "Final display\n"
 
 -- TOOLS --------------------------------------------
 
