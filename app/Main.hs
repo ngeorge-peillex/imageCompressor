@@ -70,16 +70,18 @@ getFile :: Int -> String -> IO ()
 getFile nbr path = do
     file <- readFile path
     g <- newStdGen
-    print $ (pixelsToColors(getCluster (catMaybes ( map (readPixel) (lines file))) [] nbr g))
-    print $ getClustersIndexs (catMaybes ( map (readPixel) (lines file))) (pixelsToColors(getCluster (catMaybes ( map (readPixel) (lines file))) [] nbr g))
-    print $ map (readPixel) (lines file)
+    print $ (pixelsToColors(getCluster (getPixelTab file) [] nbr g))
+    print $ getClustersIndexs (getPixelTab file) (pixelsToColors(getCluster (getPixelTab file) [] nbr g))
 
 -- CLUSTERISATION -----------------------------------
 
 
+getPixelTab ::String -> [Pixel]
+getPixelTab file = catMaybes ( map (readPixel) (lines file))
 
 averageColor :: [Pixel] -> Color
 averageColor array = Color 1 2 3
+
 
 
 getCluster :: [Pixel] -> [Pixel] -> Int -> StdGen -> [Pixel]
