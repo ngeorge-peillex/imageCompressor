@@ -70,30 +70,40 @@ getFile :: Int -> String -> IO ()
 getFile nbr path = do
     file <- readFile path
     g <- newStdGen
-    print $ (pixelsToColors(getCluster (getPixelTab file) [] nbr g))
     let pixel = (getPixelTab file)
-    let index = (getClustersIndexs (getPixelTab file) (pixelsToColors(getCluster (getPixelTab file) [] nbr g)))
-    print $  getClusterTab pixel index nbr
+    let cluster =  (pixelsToColors(getCluster pixel [] nbr g))
+    let index = (getClustersIndexs pixel (cluster))
+    clusterLoop nbr pixel index cluster 
 
 -- CLUSTERISATION -----------------------------------
 
 
+clusterLoop :: Int -> [Pixel] -> [Int] -> [(Double, Double, Double)] -> IO()
+clusterLoop nbr pixel index cluster = do
+    let newCluster = adjustClusters (getClusterTab pixel index nbr) nbr 0 cluster []
+    let newIndex = (getClustersIndexs pixel (newCluster))
+    if ((cmpList index newIndex) == False)
+        then clusterLoop nbr pixel newIndex newCluster
+        else do print $ (cluster) 
+                print $ (getClusterTab pixel index nbr)
 
-adjustClusters :: [[Pixel]] -> Int -> Int -> [(Double, Double, Double)] -> [(Double, Double, Double)]
-adjustClusters clusterTab k it clusters = do
+
+adjustClusters :: [[Pixel]] -> Int -> Int -> [(Double, Double, Double)] -> [(Double, Double, Double)] -> [(Double, Double, Double)]
+adjustClusters clusterTab k it clusters newClusters = do
+    let tab = (pixelsToColors (clusterTab!!it))
     if (it < k)
         then
-            adjustCluster clusterTab (pixelsToColors (clusterTab!!it)) k it clusters 
+            adjustCluster clusterTab (colorsToUnique tab 1) (colorsToUnique tab 2) (colorsToUnique tab 3) k it clusters newClusters
         else
-            clusters
+            newClusters
 
 
-adjustCluster :: [[Pixel]] -> [(Double, Double, Double)] -> Int -> Int -> [(Double, Double, Double)] -> [(Double, Double, Double)]
-adjustCluster clusterTab (ra ga ba) k it clusters = do
-    let r = (sum ra) / (length ra) ::Double
-    let g = (sum ga) / (length ga) ::Double
-    let b = (sum ba) / (length ba) ::Double
-    adjustClusters clusterTab k (it + 1) (clusters ++ [(r, g, b)])
+adjustCluster :: [[Pixel]] -> [Double] -> [Double] -> [Double] -> Int -> Int -> [(Double, Double, Double)] -> [(Double, Double, Double)] -> [(Double, Double, Double)]
+adjustCluster clusterTab ra ga ba k it clusters newClusters = do
+    let r = (sum ra) / (fromIntegral (length ra))
+    let g = (sum ga) / (fromIntegral (length ga))
+    let b = (sum ba) / (fromIntegral (length ba))
+    adjustClusters clusterTab k (it + 1) clusters  (newClusters ++ [(r, g, b)])
 
 
 
@@ -145,20 +155,23 @@ displayAll array = putStrLn "Final display\n"
 
 -- TOOLS --------------------------------------------
 
+cmpList ::  [Int] -> [Int] -> Bool
+cmpList a b = sort a == sort b 
+
 pixelToColor :: Pixel -> (Double, Double, Double)
 pixelToColor (Pixel point (Color r g b)) = (fromIntegral r, fromIntegral g, fromIntegral b)
 
 pixelsToColors :: [Pixel] -> [(Double, Double, Double)]
 pixelsToColors array = map pixelToColor array 
 
-colorToR :: (Double, Double, Double) -> Int -> Double
-colorToR (r, g, b) nbr
+colorToUnique ::  Int -> (Double, Double, Double) -> Double
+colorToUnique nbr (r, g, b) 
     | nbr == 1 = r
     | nbr == 2 = g
     | otherwise = b
 
 colorsToUnique :: [(Double, Double, Double)] -> Int -> [Double]
-colorsToUnique array nbr = map (colorToUnique) (nbr array)
+colorsToUnique array nbr = map (colorToUnique nbr) (array)
 
 usage :: IO ()
 usage = putStrLn "USAGE: ./imageCompressor n e IN\n\n\tn\tnumber of colors in the final image\n\te\tconvergence limit\n\tIN\tpath to the file containing the colors of the pixels"
