@@ -71,9 +71,11 @@ getFile nbr path = do
     file <- readFile path
     g <- newStdGen
     print $ (pixelsToColors(getCluster (getPixelTab file) [] nbr g))
-    print $ getClustersIndexs (getPixelTab file) (pixelsToColors(getCluster (getPixelTab file) [] nbr g))
+    let pixel = (getPixelTab file)
+    let index = (getClustersIndexs (getPixelTab file) (pixelsToColors(getCluster (getPixelTab file) [] nbr g)))
+    print $  [[ pixel!!y | y <- [0..((length index) -1)], x == (index!!y)] | x <- [0..(nbr - 1)] ]
 
--- CLUSTERISATION -----------------------------------
+    -- CLUSTERISATION -----------------------------------
 
 
 getPixelTab ::String -> [Pixel]
