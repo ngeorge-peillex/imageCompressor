@@ -19,6 +19,8 @@ data Color = Color Int Int Int
 instance Show Color where
     show (Color r g b) = "(" ++ show r ++ "," ++ show g ++ "," ++ show b ++ ")"
 
+
+
 data Pixel = Pixel Point Color
 instance Show Pixel where
     show (Pixel point color) = show point ++ " " ++ show color 
@@ -68,10 +70,13 @@ getFile :: Int -> String -> IO ()
 getFile nbr path = do
     file <- readFile path
     g <- newStdGen
-    print $ getCluster  (catMaybes ( map (readPixel) (lines file))) [] nbr g
+    print $ (pixelsToColors(getCluster (catMaybes ( map (readPixel) (lines file))) [] nbr g))
+    print $ getClustersIndexs (catMaybes ( map (readPixel) (lines file))) (pixelsToColors(getCluster (catMaybes ( map (readPixel) (lines file))) [] nbr g))
     print $ map (readPixel) (lines file)
 
 -- CLUSTERISATION -----------------------------------
+
+
 
 averageColor :: [Pixel] -> Color
 averageColor array = Color 1 2 3
@@ -83,9 +88,24 @@ getCluster array list k g
     | otherwise = getCluster array (list ++ [array!!(rdm)]) (k-1) g2
     where (rdm, g2) = randomR (0, length array -1) g
 
---getPointDistance :: Int -> Int -> Int -> Int -> Int
+getPointDistance :: Double -> Double -> Double -> Double -> Double -> Double -> Double
 getPointDistance xa xb ya yb za zb = sqrt((xb-xa)^2 + (yb-ya)^2 + (zb-za)^2)
 
+getClustersIndexs :: [Pixel] -> [(Double, Double, Double)] -> [Int]
+getClustersIndexs pixel cluster = (map (getClusterIndex 0 (-1) (0-1)  cluster) pixel)
+
+
+getClusterIndex :: Int -> Double -> Int -> [(Double, Double, Double)] -> Pixel -> Int
+getClusterIndex it dmin min cluster pixel = if (length cluster > it)
+    then computeClusterIndex it dmin min pixel pixel cluster
+    else min
+
+computeClusterIndex :: Int -> Double ->  Int -> Pixel -> Pixel -> [(Double, Double, Double)] -> Int
+computeClusterIndex it dmin min pixel (Pixel point (Color ra ga ba)) cluster = do
+    let (rb, gb, bb) = cluster!!it
+    if (min < 0 || (getPointDistance rb (fromIntegral ra) gb (fromIntegral ga) bb (fromIntegral ba)) < (dmin) )
+        then getClusterIndex (it + 1) (getPointDistance rb (fromIntegral ra) gb (fromIntegral ga) bb (fromIntegral ba)) (it) cluster pixel
+        else getClusterIndex (it + 1) dmin min cluster pixel
 
 
 -- DISPLAY ------------------------------------------
