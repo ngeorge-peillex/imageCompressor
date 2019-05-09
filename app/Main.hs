@@ -51,9 +51,9 @@ readPixel :: String -> Maybe Pixel
 readPixel line = let index = elemIndex ')' line
                     in case index of
                         Just index -> tupleToPixel first second
-                                        where tmp = splitAt (index + 1) line
-                                              first = readMaybe $ fst tmp :: Maybe (Int, Int)
-                                              second = readMaybe $ snd tmp :: Maybe (Int, Int, Int)
+                            where tmp = splitAt (index + 1) line
+                                  first = readMaybe $ fst tmp :: Maybe (Int, Int)
+                                  second = readMaybe $ snd tmp :: Maybe (Int, Int, Int)
                         Nothing -> Nothing
 
 tupleToPixel :: Maybe (Int, Int) -> Maybe (Int, Int, Int) -> Maybe Pixel
@@ -78,16 +78,10 @@ averageColor array = Color 1 2 3
 
 
 getCluster :: [Pixel] -> [Pixel] -> Int -> StdGen -> [Pixel]
-getCluster array list k g = do
-    let (rdm, g2) = randomR (0, length array - 1) g
-    if (k <= 0)
-        then
-        list
-        else
-        getCluster array (list ++ [array!!(rdm)]) (k-1) g2
-
-
-
+getCluster array list k g
+    | k <= 0 = list
+    | otherwise = getCluster array (list ++ [array!!(rdm)]) (k-1) g2
+    where (rdm, g2) = randomR (0, length array -1) g
 
 --getPointDistance :: Int -> Int -> Int -> Int -> Int
 getPointDistance xa xb ya yb za zb = sqrt((xb-xa)^2 + (yb-ya)^2 + (zb-za)^2)
