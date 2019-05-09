@@ -73,9 +73,33 @@ getFile nbr path = do
     print $ (pixelsToColors(getCluster (getPixelTab file) [] nbr g))
     let pixel = (getPixelTab file)
     let index = (getClustersIndexs (getPixelTab file) (pixelsToColors(getCluster (getPixelTab file) [] nbr g)))
-    print $  [[ pixel!!y | y <- [0..((length index) -1)], x == (index!!y)] | x <- [0..(nbr - 1)] ]
+    print $  getClusterTab pixel index nbr
 
 -- CLUSTERISATION -----------------------------------
+
+
+
+adjustClusters :: [[Pixel]] -> Int -> Int -> [(Double, Double, Double)] -> [(Double, Double, Double)]
+adjustClusters clusterTab k it clusters = do
+    if (it < k)
+        then
+            adjustCluster clusterTab (pixelsToColors (clusterTab!!it)) k it clusters 
+        else
+            clusters
+
+
+adjustCluster :: [[Pixel]] -> [(Double, Double, Double)] -> Int -> Int -> [(Double, Double, Double)] -> [(Double, Double, Double)]
+adjustCluster clusterTab (ra ga ba) k it clusters = do
+    let r = (sum ra) / (length ra) ::Double
+    let g = (sum ga) / (length ga) ::Double
+    let b = (sum ba) / (length ba) ::Double
+    adjustClusters clusterTab k (it + 1) (clusters ++ [(r, g, b)])
+
+
+
+getClusterTab :: [Pixel] -> [Int] -> Int -> [[Pixel]]
+getClusterTab pixel index nbr = [[ pixel!!y | y <- [0..((length index) -1)], x == (index!!y)] | x <- [0..(nbr - 1)]]
+
 
 getPixelTab ::String -> [Pixel]
 getPixelTab file = catMaybes ( map (readPixel) (lines file))
