@@ -75,16 +75,13 @@ getFile nbr path = do
     let index = (getClustersIndexs (getPixelTab file) (pixelsToColors(getCluster (getPixelTab file) [] nbr g)))
     print $  [[ pixel!!y | y <- [0..((length index) -1)], x == (index!!y)] | x <- [0..(nbr - 1)] ]
 
-    -- CLUSTERISATION -----------------------------------
-
+-- CLUSTERISATION -----------------------------------
 
 getPixelTab ::String -> [Pixel]
 getPixelTab file = catMaybes ( map (readPixel) (lines file))
 
 averageColor :: [Pixel] -> Color
 averageColor array = Color 1 2 3
-
-
 
 getCluster :: [Pixel] -> [Pixel] -> Int -> StdGen -> [Pixel]
 getCluster array list k g
@@ -100,17 +97,16 @@ getClustersIndexs pixel cluster = (map (getClusterIndex 0 (-1) (0-1)  cluster) p
 
 
 getClusterIndex :: Int -> Double -> Int -> [(Double, Double, Double)] -> Pixel -> Int
-getClusterIndex it dmin min cluster pixel = if (length cluster > it)
-    then computeClusterIndex it dmin min pixel pixel cluster
-    else min
+getClusterIndex it dmin min cluster pixel
+    | (length cluster > it) = computeClusterIndex it dmin min pixel pixel cluster
+    | otherwise = min
 
 computeClusterIndex :: Int -> Double ->  Int -> Pixel -> Pixel -> [(Double, Double, Double)] -> Int
-computeClusterIndex it dmin min pixel (Pixel point (Color ra ga ba)) cluster = do
-    let (rb, gb, bb) = cluster!!it
-    if (min < 0 || (getPointDistance rb (fromIntegral ra) gb (fromIntegral ga) bb (fromIntegral ba)) < (dmin) )
-        then getClusterIndex (it + 1) (getPointDistance rb (fromIntegral ra) gb (fromIntegral ga) bb (fromIntegral ba)) (it) cluster pixel
-        else getClusterIndex (it + 1) dmin min cluster pixel
-
+computeClusterIndex it dmin min pixel (Pixel point (Color ra ga ba)) cluster
+    | (min < 0 || (getPointDistance rb (fromIntegral ra) gb (fromIntegral ga) bb (fromIntegral ba)) < (dmin)) =
+        getClusterIndex (it + 1) (getPointDistance rb (fromIntegral ra) gb (fromIntegral ga) bb (fromIntegral ba)) (it) cluster pixel
+    | otherwise = getClusterIndex (it + 1) dmin min cluster pixel
+    where (rb, gb, bb) = cluster!!it
 
 -- DISPLAY ------------------------------------------
 
