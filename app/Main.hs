@@ -9,6 +9,7 @@ import Data.Char
 import Data.Typeable
 import System.Random
 import Text.Read
+import Numeric
 
 data Point = Point Int Int
 instance Show Point where
@@ -84,8 +85,9 @@ clusterLoop nbr pixel index cluster = do
     let newIndex = (getClustersIndexs pixel (newCluster))
     if ((cmpList index newIndex) == False)
         then clusterLoop nbr pixel newIndex newCluster
-        else do print $ (cluster) 
-                print $ (getClusterTab pixel index nbr)
+        else do displayFinal cluster $ (getClusterTab pixel index nbr)
+                --print $ (cluster) 
+                --print $ (getClusterTab pixel index nbr)
 
 
 adjustClusters :: [[Pixel]] -> Int -> Int -> [(Double, Double, Double)] -> [(Double, Double, Double)] -> [(Double, Double, Double)]
@@ -144,14 +146,22 @@ computeClusterIndex it dmin min pixel (Pixel point (Color ra ga ba)) cluster
 
 -- DISPLAY ------------------------------------------
 
-displayAverage :: Color -> IO ()
-displayAverage color = putStrLn ("--\n" ++ show color ++ "\n-\n")
+displayAverage :: (Double, Double, Double) -> IO ()
+displayAverage (r, g, b) = putStrLn ("--\n(" ++ (showFFloat (Just 2) r "") ++ "," ++ (showFFloat (Just 2) g "") ++ "," ++ (showFFloat (Just 2) b "") ++ ")\n-")
 
 displayCluster :: [Pixel] -> IO [()]
 displayCluster array = mapM (putStrLn.show) array
 
-displayAll :: [Pixel] -> IO ()
-displayAll array = putStrLn "Final display\n"
+displayAll :: ((Double, Double, Double), [Pixel]) -> IO ()
+displayAll ((r, g, b), pixel) = do
+    displayAverage $ (r, g, b)
+    --print $ pixel
+    displayCluster $ pixel
+    return ()
+    --putStrLn "Final display\n"
+
+displayFinal :: [(Double, Double, Double)] -> [[Pixel]] -> IO ()
+displayFinal averages array = mapM_ displayAll (zip averages array)
 
 -- TOOLS --------------------------------------------
 
