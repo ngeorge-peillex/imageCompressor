@@ -10,6 +10,7 @@ import Data.Typeable
 import System.Random
 import Text.Read
 import Numeric
+import Control.Exception
 
 data Point = Point Int Int
 instance Show Point where
@@ -69,12 +70,15 @@ tupleToPixel (Just (x, y)) (Just (r, g, b))
 
 getFile :: Int -> String -> IO ()
 getFile nbr path = do
-    file <- readFile path
+    file <- catch (readFile path) handler
     g <- newStdGen
     let pixel = (getPixelTab file)
     let cluster =  (pixelsToColors(getCluster pixel [] nbr g))
     let index = (getClustersIndexs pixel (cluster))
-    clusterLoop nbr pixel index cluster 
+    clusterLoop nbr pixel index cluster
+    where
+        handler :: SomeException -> IO String
+        handler ex = putStrLn "File not found." >> exitError
 
 -- CLUSTERISATION -----------------------------------
 
@@ -86,9 +90,6 @@ clusterLoop nbr pixel index cluster = do
     if ((cmpList index newIndex) == False)
         then clusterLoop nbr pixel newIndex newCluster
         else do displayFinal cluster $ (getClusterTab pixel index nbr)
-                --print $ (cluster) 
-                --print $ (getClusterTab pixel index nbr)
-
 
 adjustClusters :: [[Pixel]] -> Int -> Int -> [(Double, Double, Double)] -> [(Double, Double, Double)] -> [(Double, Double, Double)]
 adjustClusters clusterTab k it clusters newClusters = do
@@ -155,10 +156,8 @@ displayCluster array = mapM (putStrLn.show) array
 displayAll :: ((Double, Double, Double), [Pixel]) -> IO ()
 displayAll ((r, g, b), pixel) = do
     displayAverage $ (r, g, b)
-    --print $ pixel
     displayCluster $ pixel
     return ()
-    --putStrLn "Final display\n"
 
 displayFinal :: [(Double, Double, Double)] -> [[Pixel]] -> IO ()
 displayFinal averages array = mapM_ displayAll (zip averages array)
